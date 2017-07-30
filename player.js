@@ -17,6 +17,9 @@
 		this.falling = 0;
 
 		this.damage = 2;
+
+		this.maxTorchLevel = 3;
+		this.torchLevel = 0;
 	}
 
 	var floor = Math.floor.bind(Math);
@@ -34,6 +37,11 @@
 	Player.prototype.step = function(dt, keys) {
 		if(keys.space){
 			this.map.addLadder(round(this.x), round(this.y));
+		}
+		if(keys.ctrl){
+			this.torchLevel = this.maxTorchLevel;
+		} else {
+			this.torchLevel = 0;
 		}
 
 		var move = this.speed * dt;

@@ -60,8 +60,8 @@ window.addEventListener('load', function(){
 					y: Math.min(maxChange.y, Math.max(-maxChange.y, (offsetGoal.y - this.offset.y)/16))
 				};
 
-				//this.offset.x += offsetChange.x;
-				//this.offset.y += offsetChange.y;
+				this.offset.x += offsetChange.x;
+				this.offset.y += offsetChange.y;
 			}
 		},
 
@@ -79,7 +79,11 @@ window.addEventListener('load', function(){
 					height: Math.ceil(this.height/this.tileSize) + 1
 				}
 
-				this.map.draw(this.layer, area);
+				this.map.draw(this.layer, area, {
+					x: this.player.x,
+					y: this.player.y,
+					level: this.player.torchLevel,
+				});
 				this.player.draw(this.layer);
 
 				this.layer.restore();

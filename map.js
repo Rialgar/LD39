@@ -163,7 +163,7 @@ GameMap.prototype.damage = function(x, y, damage) {
 	}
 }
 
-GameMap.prototype.draw = function(layer, area) {
+GameMap.prototype.draw = function(layer, area, torch) {
 	var tileSize = this.game.tileSize;
 	for(var y = Math.max(0, area.y); y < Math.min(this.height-1, area.y + area.height); y++){
 		for(var x = Math.max(0, area.x); x < Math.min(this.width-1, area.x + area.width); x++){
@@ -174,6 +174,12 @@ GameMap.prototype.draw = function(layer, area) {
 			layer.save().translate(tileSize*x, tileSize*y);
 			var coords = this.tilemap[tilesetID];
 			var lightLevel = this.getAvgLightLevel(x, y);
+			if(torch.level > 0){
+				var dx = x-torch.x+0.5;
+				var dy = y-torch.y+0.5;
+				var dist = Math.sqrt(dx*dx + dy*dy);
+				lightLevel = Math.max(lightLevel, Math.min(1, torch.level/dist));
+			}
 			var image = this.lightedTileSets[Math.round(lightLevel*10)];
 			layer.drawImage(
 				image,
@@ -185,8 +191,8 @@ GameMap.prototype.draw = function(layer, area) {
 			layer.restore();
 		}
 	}
-	for(var y = Math.max(0, area.y); y < Math.min(this.height, area.y + area.height); y++){
-		for(var x = Math.max(0, area.x); x < Math.min(this.width, area.x + area.width); x++){
+	for(var y = Math.max(0, area.y); y <= Math.min(this.height-1, area.y + area.height); y++){
+		for(var x = Math.max(0, area.x); x <= Math.min(this.width-1, area.x + area.width); x++){
 			if(this.tiles[y][x].ladder){
 				layer.save().translate(tileSize*(x-0.5), tileSize*(y-0.5));
 
