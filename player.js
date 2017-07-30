@@ -75,6 +75,13 @@
 			this.falling += dt * (this.game.gravity - this.airResistance * this.falling * this.falling * sign(this.falling));
 		}
 
+		if(dx != 0){
+			this.lastDx = dx;
+		}
+		if(dy != 0){
+			this.lastDy = dy;
+		}
+
 		while(dy != 0){
 			var change = Math.abs(dy) > 0.9 ? 0.9*sign(dy) : dy;
 			dy -= change;
@@ -132,7 +139,7 @@
 	Player.prototype.draw = function(layer) {
 		var tileSize = this.game.tileSize;
 		layer.fillStyle('blue');
-		layer.fillCircle((this.x+0.5)*tileSize, (this.y+0.5)*tileSize, tileSize/2);
+		layer.fillCircle((this.x)*tileSize, (this.y)*tileSize, tileSize/2);
 	};
 
 
