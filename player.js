@@ -16,7 +16,7 @@
 
 		this.falling = 0;
 
-		this.damage = 1;
+		this.damage = 2;
 	}
 
 	var floor = Math.floor.bind(Math);

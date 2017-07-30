@@ -22,17 +22,15 @@ window.addEventListener('load', function(){
 			this.tileSize = 32;
 			this.gravity = 9.81 * 4;
 
-			this.map = new Map(100, 100, this, this.images.tileset, this.data.tilemap);
-			this.player = new Player(5, 4, this, this.map);
+			this.map = new GameMap(200, 200, this, this.images.tileset, this.data.tilemap);
+			this.player = new Player(100, 9, this, this.map);
 
 			this.maxOffset = {
 				x: (this.map.width - 1)*this.tileSize - this.width,
 				y: (this.map.height - 1)*this.tileSize - this.height
 			}
 
-			this.offset = {x:0, y:0}
-
-			window.__debug = this;
+			this.offset = {x:100 * this.tileSize - this.width/2, y:0}
 		},
 
 		step: function (dt) {
@@ -43,11 +41,12 @@ window.addEventListener('load', function(){
 					y: this.offset.y
 				};
 				var px = Math.round(this.player.x * this.tileSize);
-				if(this.player.lastDx > 0 && px > this.offset.x + this.width*1/4){
-					offsetGoal.x = Math.min(px - this.width*1/4, this.maxOffset.x);
-				} else if (this.player.lastDx < 0 && px < this.offset.x + this.width*3/4){
-					offsetGoal.x = Math.max(px - this.width*3/4, 0);
-				}
+				offsetGoal.x = Math.max(0, Math.min(px - this.width*1/2, this.maxOffset.x));
+				/*if(this.player.lastDx > 0 && px > this.offset.x + this.width*1/3){
+					offsetGoal.x = Math.min(px - this.width*1/3, this.maxOffset.x);
+				} else if (this.player.lastDx < 0 && px < this.offset.x + this.width*2/3){
+					offsetGoal.x = Math.max(px - this.width*2/3, 0);
+				}*/
 				var py = Math.round(this.player.y * this.tileSize);
 				offsetGoal.y = Math.max(0, Math.min(py - this.height*1/2, this.maxOffset.y));
 
@@ -57,21 +56,12 @@ window.addEventListener('load', function(){
 				}
 
 				var offsetChange = {
-					x: Math.min(maxChange.x, Math.max(-maxChange.x, (offsetGoal.x - this.offset.x)/8)),
-					y: Math.min(maxChange.y, Math.max(-maxChange.y, (offsetGoal.y - this.offset.y)/8))
+					x: Math.min(maxChange.x, Math.max(-maxChange.x, (offsetGoal.x - this.offset.x)/16)),
+					y: Math.min(maxChange.y, Math.max(-maxChange.y, (offsetGoal.y - this.offset.y)/16))
 				};
 
-				if(Math.abs(offsetChange.x) < 1){
-					this.offset.x = offsetGoal.x;
-				} else {
-					this.offset.x += offsetChange.x;
-				}
-
-				if(Math.abs(offsetChange.y) < 1){
-					this.offset.y = offsetGoal.y;
-				} else {
-					this.offset.y += offsetChange.y;
-				}
+				//this.offset.x += offsetChange.x;
+				//this.offset.y += offsetChange.y;
 			}
 		},
 
