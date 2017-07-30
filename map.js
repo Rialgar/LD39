@@ -57,12 +57,20 @@ Map.prototype.getTileId = function(x, y){
 }
 
 Map.prototype.getTilesetId = function(x, y){
-	return "" +
+	return "t-" +
 	    this.getTileId(x  , y  ) +
 		this.getTileId(x+1, y  ) +
 		this.getTileId(x  , y+1) +
 		this.getTileId(x+1, y+1);
 }
+
+Map.prototype.addLadder = function(x, y) {
+	if(!this.isSolid(x, y) && !this.isLadder(x,y)){
+		this.tiles[y][x].ladder = true;
+		return true;
+	}
+	return false;
+};
 
 Map.prototype.isLadder = function(x, y) {
 	return !!(this.tiles[y] && this.tiles[y][x] && this.tiles[y][x].ladder);
@@ -104,27 +112,25 @@ Map.prototype.draw = function(layer, area) {
 				0, 0,
 				tileSize, tileSize
 			)
-			/*if(tile.ladder){
-				layer
-					.lineWidth(tileSize/8)
-					.lineCap('square')
-					.strokeStyle('beige')
-					.beginPath()
-					.moveTo(tileSize/4, 0)
-					.lineTo(tileSize/4, tileSize)
-					.moveTo(tileSize*3/4, 0)
-					.lineTo(tileSize*3/4, tileSize)
-					.moveTo(tileSize/4, tileSize*1/8)
-					.lineTo(tileSize*3/4, tileSize*1/8)
-					.moveTo(tileSize/4, tileSize*3/8)
-					.lineTo(tileSize*3/4, tileSize*3/8)
-					.moveTo(tileSize/4, tileSize*5/8)
-					.lineTo(tileSize*3/4, tileSize*5/8)
-					.moveTo(tileSize/4, tileSize*7/8)
-					.lineTo(tileSize*3/4, tileSize*7/8)
-					.stroke();
-			}*/
 			layer.restore();
+		}
+	}
+	for(var y = Math.max(0, area.y); y < Math.min(this.height, area.y + area.height); y++){
+		for(var x = Math.max(0, area.x); x < Math.min(this.width, area.x + area.width); x++){
+			if(this.tiles[y][x].ladder){
+				layer.save().translate(tileSize*(x-0.5), tileSize*(y-0.5));
+
+				var coords = this.tilemap['a-ladder'];
+				layer.drawImage(
+					this.tileset,
+					coords.x * tileSize, coords.y * tileSize,
+					tileSize, tileSize,
+					0, 0,
+					tileSize, tileSize
+				)
+
+				layer.restore();
+			}
 		}
 	}
 };

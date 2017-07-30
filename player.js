@@ -32,6 +32,10 @@
 	}
 
 	Player.prototype.step = function(dt, keys) {
+		if(keys.space){
+			this.map.addLadder(round(this.x), round(this.y));
+		}
+
 		var move = this.speed * dt;
 		var dx = 0;
 		var dy = 0;
@@ -45,7 +49,7 @@
 			dx = 1;
 			controls.right = true;
 		}
-		if(keys.w || keys.up || keys.space){
+		if(keys.w || keys.up){
 			controls.up = true;
 		} else if(keys.s || keys.down){
 			controls.down = true;
