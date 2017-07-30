@@ -24,6 +24,12 @@ for(var key in Tiles){
 	}
 }
 
+var sign = function(x){return x > 0 ? 1 : x < 0 ? -1 : 0};
+var value = function(resource){
+	return resource === 'gold' ? 500 :
+		resource === 'silver' ? 50 :
+		0
+	};
 function GameMap(width, height, game, tileset, tilemap){
 	this.width = width;
 	this.height = height;
@@ -44,6 +50,46 @@ function GameMap(width, height, game, tileset, tilemap){
 			this.tiles[y][x].light = y < 11 ? 1 : 0;
 		}
 	}
+
+	var sum = 0;
+	while(sum < 500000){
+		var sx = 10 + Math.floor(Math.random() * (this.width - 20));
+		var sy = 20 + Math.floor(Math.pow(Math.random(), 0.75) * (this.height - 30));
+		var l = Math.pow(Math.random(), 100) * 10;
+		var dir = Math.random() * 2 * Math.PI;
+		var sin = Math.sin(dir);
+		var cos = Math.cos(dir);
+		var material = Math.random() < 0.1 ? 'gold' : 'silver';
+
+		var x = sx;
+		var y = sy;
+		var dx = x-sx;
+		var dy = y-sy;
+		var d = Math.sqrt(dx*dx + dy*dy);
+		while(x >= 0 && x < this.width && y > 10 && y < this.height && d < l){
+			if(!this.tiles[y][x].resource){
+				this.tiles[y][x].resource = material;
+				sum += value(material);
+			}
+			if(d>0){
+				if(Math.abs(dx/d - sin) > Math.abs(dy/d - cos)){
+					x += sign(sin);
+				} else {
+					y += sign(cos);
+				}
+			}else{
+				if(Math.abs(sin) > Math.abs(cos)){
+					x += sign(sin);
+				} else {
+					y += sign(cos);
+				}
+			}
+			dx = x-sx;
+			dy = y-sy;
+			d = Math.sqrt(dx*dx + dy*dy);
+		}
+	}
+
 	for(var x = 0; x < this.width; x++){
 		this.updateLight(this.tiles[10][x]);
 	}
@@ -112,7 +158,7 @@ GameMap.prototype.getPassedLight = function(x, y){
 	if(tile.solid){
 		return tile.light-0.1;
 	} else {
-		return tile.light*0.99;
+		return tile.light*0.97;
 	}
 }
 
@@ -151,16 +197,27 @@ GameMap.prototype.updateLight = function(tile){
 GameMap.prototype.damage = function(x, y, damage) {
 	var tile = this.tiles[y] && this.tiles[y][x];
 	if(tile && tile.maxHealth){
-		console.log(x, y, tile.health);
 		tile.health -= damage;
-		console.log(x, y, tile.health);
 		if(tile.health <= 0){
-			var light = this.tiles[y][x].light;
 			this.tiles[y][x] = new Tiles.dugGround(x, y);
-			this.tiles[y][x].light = light;
+			this.tiles[y][x].light = tile.light;
 			this.updateLight(this.tiles[y][x]);
+
+			var v = value(tile.resource);
+			if(v > 0){
+				this.game.addTextEffect({
+					time: 0,
+					x: x,
+					y: y,
+					text: '+' + v,
+					color: 'yellow'
+				});
+			}
+
+			return v;
 		}
 	}
+	return 0;
 }
 
 GameMap.prototype.draw = function(layer, area, torch) {
@@ -172,6 +229,7 @@ GameMap.prototype.draw = function(layer, area, torch) {
 				continue;
 			}
 			layer.save().translate(tileSize*x, tileSize*y);
+
 			var coords = this.tilemap[tilesetID];
 			var lightLevel = this.getAvgLightLevel(x, y);
 			if(torch.level > 0){
@@ -193,12 +251,26 @@ GameMap.prototype.draw = function(layer, area, torch) {
 	}
 	for(var y = Math.max(0, area.y); y <= Math.min(this.height-1, area.y + area.height); y++){
 		for(var x = Math.max(0, area.x); x <= Math.min(this.width-1, area.x + area.width); x++){
-			if(this.tiles[y][x].ladder){
+			var tile = this.tiles[y][x];
+			if(tile.ladder || tile.resource){
 				layer.save().translate(tileSize*(x-0.5), tileSize*(y-0.5));
 
-				var coords = this.tilemap['a-ladder'];
+				var coords;
+				if(tile.ladder){
+					coords = this.tilemap['a-ladder'];
+				} else {
+					coords = this.tilemap['a-' + tile.resource];
+				}
+				var lightLevel = this.getLight(x, y);
+				if(torch.level > 0){
+					var dx = x-torch.x+0.5;
+					var dy = y-torch.y+0.5;
+					var dist = Math.sqrt(dx*dx + dy*dy);
+					lightLevel = Math.max(lightLevel, Math.min(1, torch.level/dist));
+				}
+				var image = this.lightedTileSets[Math.round(lightLevel*10)];
 				layer.drawImage(
-					this.tileset,
+					image,
 					coords.x * tileSize, coords.y * tileSize,
 					tileSize, tileSize,
 					0, 0,
@@ -209,4 +281,4 @@ GameMap.prototype.draw = function(layer, area, torch) {
 			}
 		}
 	}
-};
+}

@@ -20,6 +20,10 @@
 
 		this.maxTorchLevel = 3;
 		this.torchLevel = 0;
+		this.torchActive = false;
+
+		this.power = 1;
+		this.money = 0;
 	}
 
 	var floor = Math.floor.bind(Math);
@@ -34,17 +38,61 @@
 		}
 	}
 
-	Player.prototype.step = function(dt, keys) {
-		if(keys.space){
-			this.map.addLadder(round(this.x), round(this.y));
-		}
-		if(keys.ctrl){
-			this.torchLevel = this.maxTorchLevel;
+	Player.prototype.toggleTorch = function(){
+		this.torchActive = !this.torchActive && this.power > 0
+
+		if(this.torchActive){
+			this.torchLevel = this.maxTorchLevel * this.power;
 		} else {
 			this.torchLevel = 0;
 		}
+	}
+
+	Player.prototype.step = function(dt, keys) {
+		if(this.torchActive){
+			this.power -= dt * 1/60;
+			if(this.power <= 0){
+				this.toggleTorch();
+			} else {
+				this.torchLevel = this.maxTorchLevel * this.power;
+			}
+		} else {
+			this.power -= dt * 1/600;
+		}
+		this.power = Math.max(0, this.power);
+		var light = this.map.getLight(round(this.x), round(this.y));
+
+		var minLight = 0.8;
+		var timeTillFull = 10;
+
+		var charge = Math.max(0, (light - minLight)) * dt / (1-minLight) / timeTillFull;
+		this.power = Math.min(1, this.power + charge);
+
+		if(keys.space && this.money > 0){
+			if(this.map.addLadder(round(this.x), round(this.y))){
+				this.money -= 1;
+				this.game.addTextEffect({
+					x: this.x,
+					y: this.y,
+					time: 0,
+					text: '-1',
+					color: 'red'
+				})
+			}
+		}
+		if(keys.ctrl){
+			if(!this.torchToggled){
+				this.toggleTorch();
+				this.torchToggled = true;
+			}
+		} else {
+			this.torchToggled = false;
+		}
 
 		var move = this.speed * dt;
+		if(this.power <= 0){
+			move /= 10;
+		}
 		var dx = 0;
 		var dy = 0;
 
@@ -80,7 +128,7 @@
 		} else {
 			dx = dx * move;
 
-			if(this.onGround && (keys.w || keys.up || keys.space)){
+			if(this.onGround && controls.up){
 				this.falling = -this.jumpSpeed;
 			}
 			dy = dt * this.falling + dt*dt * this.game.gravity/2;
@@ -104,12 +152,12 @@
 			if(this.map.isSolid(floor(this.x), ty)){
 				col = true;
 				if(change > 0 && controls.down || change < 0 && controls.up){
-					this.map.damage(floor(this.x), ty, this.damage * dt);
+					this.money += this.map.damage(floor(this.x), ty, this.damage * dt);
 				}
 			} else if(this.map.isSolid(ceil(this.x), ty)){
 				col = true;
 				if(change > 0 && controls.down || change < 0 && controls.up){
-					this.map.damage(ceil(this.x), ty, this.damage * dt);
+					this.money += this.map.damage(ceil(this.x), ty, this.damage * dt);
 				}
 			}
 
@@ -130,12 +178,12 @@
 			if(this.map.isSolid(tx, floor(this.y))){
 				col = true;
 				if(change > 0 && controls.right || change < 0 && controls.left){
-					this.map.damage(tx, floor(this.y), this.damage * dt);
+					this.money += this.map.damage(tx, floor(this.y), this.damage * dt);
 				}
 			} else if(this.map.isSolid(tx, ceil(this.y))){
 				col = true;
 				if(change > 0 && controls.right || change < 0 && controls.left){
-					this.map.damage(tx, ceil(this.y), this.damage * dt);
+					this.money += this.map.damage(tx, ceil(this.y), this.damage * dt);
 				}
 			}
 

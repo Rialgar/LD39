@@ -1,4 +1,11 @@
 window.addEventListener('load', function(){
+	function pad(string , length){
+		string = ""+string;
+		while(string.length < length){
+			string = '0' + string;
+		}
+		return string;
+	}
 	var app = playground({
 		scale: 1,
 		width: 640,
@@ -19,10 +26,12 @@ window.addEventListener('load', function(){
 				}
 			}
 
+			this.textEffects = [];
+
 			this.tileSize = 32;
 			this.gravity = 9.81 * 4;
 
-			this.map = new GameMap(200, 200, this, this.images.tileset, this.data.tilemap);
+			this.map = new GameMap(200, 300, this, this.images.tileset, this.data.tilemap);
 			this.player = new Player(100, 9, this, this.map);
 
 			this.maxOffset = {
@@ -65,9 +74,19 @@ window.addEventListener('load', function(){
 			}
 		},
 
+		addTextEffect: function(ef){
+			this.textEffects.push(ef);
+		},
+
 		render: function (dt) {
 			if(this.map && this.player){
-				this.layer
+				var layer = this.layer
+				var tileSize = this.tileSize;
+
+				layer.smoothing = false;
+				layer.canvas.style.imageRendering = 'pixelated';
+
+				layer
 					.clear("#31a2f2")
 					.save()
 					.translate(Math.round(-this.offset.x), Math.round(-this.offset.y));
@@ -86,7 +105,32 @@ window.addEventListener('load', function(){
 				});
 				this.player.draw(this.layer);
 
-				this.layer.restore();
+				this.textEffects = this.textEffects.filter(function(ef){
+					return ef.time < 1;
+				});
+				this.textEffects.forEach(function(ef){
+					var x = ef.x;
+					var y = ef.y;
+					if(x >= area.x && x < area.x+area.width && y >= area.y && y < area.y+area.height){
+						layer.fillStyle(ef.color)
+						     .fillText(ef.text, x*tileSize - ef.text.length*4, ef.y * tileSize - ef.time*tileSize);
+						console.log(ef.text, x*tileSize - ef.text.length*4, ef.y * tileSize - ef.time*tileSize);
+					}
+					ef.time += dt;
+				});
+
+				var h = this.height*this.player.power;
+
+				layer
+					.restore()
+					.fillStyle('yellow')
+					.strokeStyle('yellow')
+					.lineWidth(1)
+					.strokeRect(0, 0, tileSize/4, this.height)
+					.fillRect(0, this.height-h, tileSize/4, h)
+					.font("16px silkscreen")
+					.fillText(pad(this.player.money, 6), this.width - 60, 20);
+
 			}
 		},
 
@@ -97,4 +141,4 @@ window.addEventListener('load', function(){
 			));
 		}
 	});
-})
+});
