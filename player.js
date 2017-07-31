@@ -27,7 +27,7 @@
 
 		this.maxPower = 1;
 		this.power = 1;
-		this.money = 20000;
+		this.money = 0;
 
 		this.timeInFrame = 0;
 		this.animationFrame = 0;
