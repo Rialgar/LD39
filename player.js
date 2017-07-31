@@ -1,8 +1,11 @@
 (function(){
-	function Player(x, y, game, map){
+	function Player(x, y, game, map, spritesheet, animations){
 		this.x = x;
 		this.y = y;
 		this.game = game;
+
+		this.spritesheet = spritesheet;
+		this.animations = animations;
 
 		this.speed = 10;
 		this.jumpSpeed = 20;
@@ -22,8 +25,12 @@
 		this.torchLevel = 0;
 		this.torchActive = false;
 
+		this.maxPower = 1;
 		this.power = 1;
-		this.money = 0;
+		this.money = 20000;
+
+		this.timeInFrame = 0;
+		this.animationFrame = 0;
 	}
 
 	var floor = Math.floor.bind(Math);
@@ -42,11 +49,20 @@
 		this.torchActive = !this.torchActive && this.power > 0
 
 		if(this.torchActive){
-			this.torchLevel = this.maxTorchLevel * this.power;
+			this.torchLevel = this.maxTorchLevel * this.power  / this.maxPower;
 		} else {
 			this.torchLevel = 0;
 		}
 	}
+
+	Player.prototype.getAnimationName = function(controls){
+		var direction = controls.left ? 'Left' :
+			controls.right ? 'Right' :
+			controls.up ? 'Up' :
+			controls.down ? 'Down' :
+			'Front';
+		return direction + (this.torchActive ? '_On' : '_Off');
+	};
 
 	Player.prototype.step = function(dt, keys) {
 		if(this.torchActive){
@@ -54,7 +70,7 @@
 			if(this.power <= 0){
 				this.toggleTorch();
 			} else {
-				this.torchLevel = this.maxTorchLevel * this.power;
+				this.torchLevel = this.maxTorchLevel * this.power / this.maxPower;
 			}
 		} else {
 			this.power -= dt * 1/600;
@@ -66,9 +82,9 @@
 		var timeTillFull = 10;
 
 		var charge = Math.max(0, (light - minLight)) * dt / (1-minLight) / timeTillFull;
-		this.power = Math.min(1, this.power + charge);
+		this.power = Math.min(this.maxPower, this.power + charge);
 
-		if(keys.space && this.money > 0){
+		if((keys.space || keys.enter) && this.money > 0 && this.y > 10){
 			if(this.map.addLadder(round(this.x), round(this.y))){
 				this.money -= 1;
 				this.game.addTextEffect({
@@ -80,7 +96,7 @@
 				})
 			}
 		}
-		if(keys.ctrl){
+		if(keys.ctrl || keys.shift || keys.cmd || keys.alt || keys.y || keys.x || keys.z || keys.c || keys.v){
 			if(!this.torchToggled){
 				this.toggleTorch();
 				this.torchToggled = true;
@@ -101,15 +117,17 @@
 		if(keys.a || keys.left){
 			dx = -1;
 			controls.left = true;
-		} else if(keys.d || keys.right){
+		} else if(keys.d || keys.e || keys.right){
 			dx = 1;
 			controls.right = true;
 		}
-		if(keys.w || keys.up){
+		if(keys.w || keys.comma || keys.up){
 			controls.up = true;
-		} else if(keys.s || keys.down){
+		} else if(keys.s || keys.o || keys.down){
 			controls.down = true;
 		}
+
+		this.animationName = this.getAnimationName(controls);
 
 		if(this.map.isLadder(round(this.x), ceil(this.y))){
 			this.falling = 0;
@@ -128,7 +146,7 @@
 		} else {
 			dx = dx * move;
 
-			if(this.onGround && controls.up){
+			if(this.onGround && controls.up && this.power > 0){
 				this.falling = -this.jumpSpeed;
 			}
 			dy = dt * this.falling + dt*dt * this.game.gravity/2;
@@ -196,10 +214,28 @@
 		this.onGround = this.map.isSolid(floor(this.x), round(this.y+0.5)) || this.map.isSolid(ceil(this.x), round(this.y+0.5));
 	};
 
-	Player.prototype.draw = function(layer) {
+	Player.prototype.draw = function(dt, layer) {
 		var tileSize = this.game.tileSize;
-		layer.fillStyle('blue');
-		layer.fillCircle((this.x)*tileSize, (this.y)*tileSize, tileSize/2);
+		var animation = this.animations[this.animationName];
+		if(this.power <= 0){
+			this.timeInFrame = 0;
+			this.animationFrame = 2;
+		} else {
+			this.timeInFrame += dt*1000;
+			while(animation[this.animationFrame].time < this.timeInFrame){
+				this.timeInFrame -= animation[this.animationFrame].time;
+				this.animationFrame = (this.animationFrame+1) % animation.length;
+			}
+		}
+
+		var coords = animation[this.animationFrame].tile;
+		layer.drawImage(
+			this.spritesheet,
+			coords.x * tileSize, coords.y * tileSize,
+			tileSize, tileSize,
+			(this.x-0.5)*tileSize, (this.y-0.5)*tileSize,
+			tileSize, tileSize
+		)
 	};
 
 

@@ -1,0 +1,35 @@
+{
+	"columns": 4,
+	"animations": {
+		"Front" : [
+			{"tile": 0, "time": 3000},
+			{"tile": 1, "time": 100},
+			{"tile": 2, "time": 100},
+			{"tile": 3, "time": 100}
+		],
+		"Right" : [
+			{"tile": 4, "time": 3000},
+			{"tile": 5, "time": 100},
+			{"tile": 6, "time": 100},
+			{"tile": 7, "time": 100}
+		],
+		"Left" : [
+			{"tile": 8, "time": 3000},
+			{"tile": 9, "time": 100},
+			{"tile":10, "time": 100},
+			{"tile":11, "time": 100}
+		],
+		"Up" : [
+			{"tile":12, "time": 3000},
+			{"tile":13, "time": 100},
+			{"tile":14, "time": 100},
+			{"tile":15, "time": 100}
+		],
+		"Down" : [
+			{"tile":16, "time": 3000},
+			{"tile":17, "time": 100},
+			{"tile":18, "time": 100},
+			{"tile":19, "time": 100}
+		]
+	}
+}

@@ -2,14 +2,14 @@
 
 /* file: license.txt */
 
-/*     
+/*
 
   PlaygroundJS r12
-  
+
   http://playgroundjs.com
-  
+
   (c) 2012-2016 http://rezoner.net
-  
+
   Playground may be freely distributed under the MIT license.
 
   latest major changes:
@@ -22,7 +22,7 @@
   r11
 
   + sound panning
-  
+
   r10
 
   + tween.call
@@ -49,7 +49,7 @@
   + custom transitions
   + fixes for gamepad
   + updated CanvasQuery
-  
+
   r5
 
   + game loop split into render and step - check profiler
@@ -60,7 +60,7 @@
   + gamepad stick issue
   + pointerwheel event
   + updated CanvasQuery
-  - removed video recorder  
+  - removed video recorder
 
   r4
 
@@ -75,16 +75,16 @@
 
 /* file: src/lib/Ease.js */
 
-/*     
+/*
 
   Ease 1.1
-  
+
   http://canvasquery.com
-  
+
   (c) 2015 by Rezoner - http://rezoner.net
 
   `ease` may be freely distributed under the MIT license.
-     
+
   Cubic-spline interpolation by Ivan Kuckir
 
   http://blog.ivank.net/interpolation-with-cubic-splines.html
@@ -897,10 +897,10 @@ PLAYGROUND.Events.prototype = {
     for (var i = 0, len = this.listeners[event].length; i < len; i++) {
 
       if (this.listeners[event][i] === callback) {
-      
+
         this.listeners[event].splice(i--, 1);
         len--;
-      
+
       }
 
     }
@@ -936,7 +936,7 @@ PLAYGROUND.Events.prototype = {
     /* or subscribed to a single event */
 
     if (this.listeners[event]) {
-      
+
       for (var i = 0, len = this.listeners[event].length; i < len; i++) {
 
         var listener = this.listeners[event][i];
@@ -946,10 +946,10 @@ PLAYGROUND.Events.prototype = {
         if (listener.once) {
           this.listeners[event].splice(i--, 1);
           len--;
-        } 
+        }
 
       }
-      
+
     }
 
   }
@@ -1059,7 +1059,7 @@ PLAYGROUND.States.prototype = {
    * Don't call this function directly. Instead, use
    * `PLAYGROUND.Application.setState()`.
    */
-   
+
   set: function(state) {
 
     if (this.current && this.current.leave) this.current.leave();
@@ -1267,7 +1267,7 @@ PLAYGROUND.Application.prototype = {
 
   /**
       Change active state.
-      Simply forwarded to PLAYGROUND.States.  
+      Simply forwarded to PLAYGROUND.States.
 
   */
 
@@ -1671,7 +1671,7 @@ PLAYGROUND.Application.prototype = {
   /*
 
     Loads images.
-   
+
     The list may be nested.
 
   */
@@ -1759,9 +1759,9 @@ PLAYGROUND.Application.prototype = {
 
   },
 
-  /* 
+  /*
     Load a single font.
-   
+
     At this point it doesn't really load font
     it just ensures the font has been loaded (use css font-face)
 
@@ -1789,9 +1789,9 @@ PLAYGROUND.Application.prototype = {
 
   },
 
-  /* 
+  /*
 
-    Load a single font (internal).  
+    Load a single font (internal).
     It actually doesn't load any font - just ensures it has been loaded (with css)
 
   */
@@ -2104,7 +2104,7 @@ PLAYGROUND.Gamepads.prototype = {
       /*
             for (var h = 12; h <= 15; h++) {
 
-              // if (!buttons[h]) 
+              // if (!buttons[h])
 
               buttons[h] = {
                 pressed: false,
@@ -2564,7 +2564,7 @@ PLAYGROUND.Pointer.prototype = {
     pointer.x = e.x;
     pointer.y = e.y;
     // pointer.touch = e.touch;
-    // pointer.mouse = e.mouse;    
+    // pointer.mouse = e.mouse;
     pointer.id = e.id;
 
     return pointer;
@@ -3130,7 +3130,7 @@ PLAYGROUND.Mouse.prototype = {
             */
 
     }
-  
+
   }
 
 };
@@ -3952,7 +3952,7 @@ PLAYGROUND.Touch.prototype = {
     var prevent = !PLAYGROUND.Utils.classInParents(e.target, "ui");
 
     if (prevent) e.preventDefault();
-    
+
   }
 
 };
@@ -3990,10 +3990,10 @@ PLAYGROUND.Tween.prototype = {
 
   },
 
-  /* 
+  /*
 
     Add an action to the end of the list
-     
+
     @param properties
     @param duration in miliseconds (optional, default is 0.5)
     @param easing (optional, default is linear)
@@ -4158,13 +4158,13 @@ PLAYGROUND.Tween.prototype = {
 
   },
 
-  /* 
+  /*
 
     Perform one animation step
-   
+
     Advances the index and, if the index reached the end of the
     `actions` array, either restarts it (for looped tweens) or terminates it.
-   
+
     The function will set a string in `currentAction` indicating what it
     should be done next but it does not perform the action itself.
 
@@ -4372,10 +4372,10 @@ PLAYGROUND.Tween.prototype = {
 
   },
 
-  /* 
+  /*
 
     Advances the animation if enough time has passed
-   
+
     The function is called in response to `step()`; it will advance the
     index to next slot in the animation if
 
@@ -4406,14 +4406,14 @@ PLAYGROUND.Tween.prototype = {
 PLAYGROUND.Utils.extend(PLAYGROUND.Tween.prototype, PLAYGROUND.Events.prototype);
 
 
-/* 
+/*
 
   Manager for easing effects (transition between various states).
- 
+
   If `app` is provided the manager becomes application's manager
   for tween effects. The constructor inserts a `tween()` function
   in application for simplicity.
- 
+
   Properties:
   - delta:
   - defaultEasing:
@@ -4451,12 +4451,12 @@ PLAYGROUND.TweenManager.prototype = {
 
   },
 
-  /* 
+  /*
 
     Marks the tween for removing.
-   
+
     The tween is actually removed in `step()` function.
-   
+
     @param object the object associated with the tween
     @param safe if the tween located using `object` is `safe` then it is not removed.
 
@@ -4474,16 +4474,16 @@ PLAYGROUND.TweenManager.prototype = {
 
   },
 
-  /* 
+  /*
 
     Create a new tween.
-   
+
     The tween is also added to internal list (you don't have to call
     `add()` yourself).
-   
+
     @param context the object to associate with the new tween
     @returns a new PLAYGROUND.Tween object
-  
+
   */
 
   tween: function(context) {
@@ -4496,13 +4496,13 @@ PLAYGROUND.TweenManager.prototype = {
 
   },
 
-  /* 
+  /*
 
     Called each frame to update logic.
-   
+
     The function updates all active tweens and removes the ones
     tagged as such.
-   
+
   */
 
   step: function(delta) {
@@ -4912,14 +4912,14 @@ PLAYGROUND.LoadingScreen = {
 
 /* file: src/lib/CanvasQuery.js */
 
-/*     
+/*
 
   Canvas Query r9
-  
+
   http://canvasquery.com
-  
+
   (c) 2012-2016 http://rezoner.net
-  
+
   Canvas Query may be freely distributed under the MIT license.
 
   r9
@@ -4938,7 +4938,7 @@ PLAYGROUND.LoadingScreen = {
   + fillText respects no antialiasing when using pixel font
   + textBaseline("top") consistent among browsers
   + align state is added to the stack
-  + new canvases are pulled from the pool  
+  + new canvases are pulled from the pool
   + filter (experimetnal)
 
   r6
@@ -5671,7 +5671,7 @@ PLAYGROUND.LoadingScreen = {
 
         cq.setContextSmoothing(context, false);
 
-        // context.fillStyle = "#fff"; 
+        // context.fillStyle = "#fff";
         // context.fillRect(0,0,canvas.width, canvas.height);
 
         context.font = this.context.font;
@@ -7984,13 +7984,13 @@ PLAYGROUND.LoadingScreen = {
 
 /* file: src/layer/Layer.js */
 
-/** 
-  
+/**
+
   Renderer build on top of CanvasQuery library.
- 
+
   The application is enhanced with a `layer` member that
   provides access to the canvas.
- 
+
   Reference: http://playgroundjs.com/playground-layer
 
 */

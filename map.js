@@ -93,6 +93,8 @@ function GameMap(width, height, game, tileset, tilemap){
 	for(var x = 0; x < this.width; x++){
 		this.updateLight(this.tiles[10][x]);
 	}
+
+	this.didShowLadderTip = false;
 };
 
 GameMap.prototype.getTile = function(x, y){
@@ -212,6 +214,11 @@ GameMap.prototype.damage = function(x, y, damage) {
 					text: '+' + v,
 					color: 'yellow'
 				});
+
+				if(!this.didShowLadderTip){
+					this.game.addMessage("Press [Space] to build Ladders.");
+					this.didShowLadderTip = true;
+				}
 			}
 
 			return v;
